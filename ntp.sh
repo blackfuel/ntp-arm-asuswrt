@@ -128,8 +128,8 @@ if [ ! -f "$FOLDER/__package_installed" ]; then
 [ ! -d "$FOLDER" ] && tar xzvf $DL
 cd $FOLDER
 
-#mkdir -p "$PACKAGE_ROOT/bin"
-#mkdir -p "$PACKAGE_ROOT/usr/man"
+mkdir -p "$PACKAGE_ROOT/bin"
+mkdir -p "$PACKAGE_ROOT/usr/man"
 
 CC="arm-brcm-linux-uclibcgnueabi-gcc" \
 STRIP="arm-brcm-linux-uclibcgnueabi-strip" \
