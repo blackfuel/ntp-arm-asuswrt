@@ -128,8 +128,8 @@ if [ ! -f "$FOLDER/__package_installed" ]; then
 [ ! -d "$FOLDER" ] && tar xzvf $DL
 cd $FOLDER
 
-mkdir -p "$PACKAGE_ROOT/bin"
-mkdir -p "$PACKAGE_ROOT/usr/man"
+#mkdir -p "$PACKAGE_ROOT/bin"
+#mkdir -p "$PACKAGE_ROOT/usr/man"
 
 CC="arm-brcm-linux-uclibcgnueabi-gcc" \
 STRIP="arm-brcm-linux-uclibcgnueabi-strip" \
@@ -137,7 +137,8 @@ CFLAGS="-ffunction-sections -fdata-sections -O3 -pipe -march=armv7-a -mtune=cort
 LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections -L$SYSROOT/usr/lib" \
 ./configure \
 --host=arm-brcm-linux-uclibcgnueabi \
-'--build='
+'--build=' \
+--prefix=$PACKAGE_ROOT
 
 $MAKE
 DESTDIR="$PACKAGE_ROOT" make install
