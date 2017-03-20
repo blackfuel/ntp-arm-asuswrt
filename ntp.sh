@@ -14,8 +14,8 @@ PATH_CMD="$(readlink -f $0)"
 set -e
 set -x
 
-REBUILD_ALL=1
-PACKAGE_ROOT="$HOME/asuswrt-merlin-addon/ntp"
+#REBUILD_ALL=1
+PACKAGE_ROOT="$HOME/asuswrt-merlin-addon/asuswrt"
 SRC="$PACKAGE_ROOT/src"
 ASUSWRT_MERLIN="$HOME/asuswrt-merlin"
 TOP="$ASUSWRT_MERLIN/release/src/router"
@@ -166,10 +166,10 @@ cd $TOP/ncurses/lib
 popd
 
 PKG_CONFIG_PATH="$PACKAGE_ROOT/lib/pkgconfig" \
-OPTS="-ffunction-sections -fno-data-sections -O3 -pipe -march=armv7-a -mtune=cortex-a9 -fno-caller-saves -mfloat-abi=soft -Wall -fPIC -std=gnu99 -I$TOP/ncurses/include -I$SYSROOT/usr/include -lm" \
+OPTS="-ffunction-sections -fno-data-sections -O3 -pipe -march=armv7-a -mtune=cortex-a9 -fno-caller-saves -mfloat-abi=soft -Wall -fPIC -std=gnu99 -I$SYSROOT/usr/include -lm" \
 CFLAGS="$OPTS" CPPFLAGS="$OPTS" \
-LDFLAGS="-ffunction-sections -fno-data-sections -Wl,--gc-sections -L$TOP/ncurses/lib -L$SYSROOT/usr/lib" \
-LIBS="-lm -lncursesw -L$TOP/ncurses/lib -L$SYSROOT/usr/lib" \
+LDFLAGS="-ffunction-sections -fno-data-sections -Wl,--gc-sections -L$SYSROOT/usr/lib" \
+LIBS="-lm -L$SYSROOT/usr/lib" \
 ./configure \
 --host=arm-brcm-linux-uclibcgnueabi \
 '--build=' \
@@ -177,7 +177,9 @@ LIBS="-lm -lncursesw -L$TOP/ncurses/lib -L$SYSROOT/usr/lib" \
 --enable-shared \
 --enable-static \
 --disable-rpath \
---disable-silent-rules --disable-agetty --disable-chfn-chsh --disable-login --disable-nologin --disable-su --disable-setpriv --disable-runuser --disable-pylibmount --disable-more --disable-libfdisk --disable-libsmartcols --disable-cal --disable-makeinstall-chown --disable-makeinstall-setuid --without-python --without-systemd --without-systemdsystemunitdir --with-sysroot=$SYSROOT
+--disable-silent-rules --disable-makeinstall-chown --disable-makeinstall-setuid --with-sysroot=$SYSROOT \
+--disable-agetty \
+--without-ncurses --without-ncursesw
 
 $MAKE
 make install
