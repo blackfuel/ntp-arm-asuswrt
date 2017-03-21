@@ -21,7 +21,8 @@ ASUSWRT_MERLIN="$HOME/asuswrt-merlin"
 TOP="$ASUSWRT_MERLIN/release/src/router"
 SYSROOT="$ASUSWRT_MERLIN/release/src-rt-6.x.4708/toolchains/hndtools-arm-linux-2.6.36-uclibc-4.5.3/arm-brcm-linux-uclibcgnueabi/sysroot"
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/brcm-arm/bin:/opt/brcm/hndtools-mipsel-linux/bin:/opt/brcm/hndtools-mipsel-uclibc/bin
-MAKE="make -j`nproc`"
+#MAKE="make -j`nproc`"
+MAKE="make -j1"
 
 ############# ###############################################################
 # PPS-TOOLS # ###############################################################
@@ -166,10 +167,10 @@ cd $TOP/ncurses/lib
 popd
 
 PKG_CONFIG_PATH="$PACKAGE_ROOT/lib/pkgconfig" \
-OPTS="-ffunction-sections -fno-data-sections -O3 -pipe -march=armv7-a -mtune=cortex-a9 -fno-caller-saves -mfloat-abi=soft -Wall -fPIC -std=gnu99 -I$SYSROOT/usr/include -lm" \
+OPTS="-ffunction-sections -fno-data-sections -O3 -pipe -march=armv7-a -mtune=cortex-a9 -fno-caller-saves -mfloat-abi=soft -Wall -fPIC -std=gnu99 -I$TOP/ncurses/include -I$SYSROOT/usr/include -lm" \
 CFLAGS="$OPTS" CPPFLAGS="$OPTS" \
-LDFLAGS="-ffunction-sections -fno-data-sections -Wl,--gc-sections -L$SYSROOT/usr/lib" \
-LIBS="-lm -L$SYSROOT/usr/lib" \
+LDFLAGS="-ffunction-sections -fno-data-sections -Wl,--gc-sections -L$TOP/ncurses/lib -L$SYSROOT/usr/lib" \
+LIBS="-lm -lncursesw -L$TOP/ncurses/lib -L$SYSROOT/usr/lib" \
 ./configure \
 --host=arm-brcm-linux-uclibcgnueabi \
 '--build=' \
