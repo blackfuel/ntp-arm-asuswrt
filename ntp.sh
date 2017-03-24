@@ -53,68 +53,6 @@ TIMEPPS_H="$PACKAGE_ROOT/usr/include/sys/timepps.h"
 touch __package_installed
 fi
 
-####### #####################################################################
-# NTP # #####################################################################
-####### #####################################################################
-
-DL="ntp-4.2.8p9-win.tar.gz"
-URL="http://archive.ntp.org/ntp4/ntp-4.2/$DL"
-mkdir -p $SRC/ntp && cd $SRC/ntp
-FOLDER="${DL%.tar.gz*}"
-[ "$REBUILD_ALL" == "1" ] && rm -rf "$FOLDER"
-if [ ! -f "$FOLDER/__package_installed" ]; then
-[ ! -f "$DL" ] && wget $URL
-[ ! -d "$FOLDER" ] && tar xzvf $DL
-cd $FOLDER
-
-# add support for PPS kernel interface (if not already there)
-TIMEPPS_H="${PATH_CMD%/*}/timepps.h"
-PACKAGE_ROOT_TIMEPPS_H="$PACKAGE_ROOT/usr/include/timepps.h"
-if [ ! -f "$PACKAGE_ROOT_TIMEPPS_H" ] && [ -f "$TIMEPPS_H" ]; then
-  PACKAGE_ROOT_INCLUDE="${PACKAGE_ROOT_TIMEPPS_H%/*}"
-  mkdir -p "$PACKAGE_ROOT_INCLUDE"
-  cp -p "$TIMEPPS_H" "$PACKAGE_ROOT_INCLUDE"
-fi
-
-# build NTP (NEMA+PPS)
-PKG_CONFIG_PATH="$PACKAGE_ROOT/lib/pkgconfig" \
-OPTS="-DOPENSSL -ffunction-sections -fdata-sections -O3 -pipe -march=armv7-a -mtune=cortex-a9 -fno-caller-saves -mfloat-abi=soft -Wall -fPIC -std=gnu99 -I$PACKAGE_ROOT/include  -I$PACKAGE_ROOT/usr/include" \
-CFLAGS="$OPTS" CXXFLAGS="$OPTS" CPPFLAGS="$OPTS" \
-LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections  -L$PACKAGE_ROOT/lib" \
-ac_cv_header_md5_h=no ac_cv_lib_rt_sched_setscheduler=no ac_cv_header_dns_sd_h=no hw_cv_func_snprintf_c99=yes hw_cv_func_vsnprintf_c99=yes ac_cv_make_ntptime=yes \
-./configure \
---host=arm-brcm-linux-uclibcgnueabi \
-'--build=' \
---prefix=$PACKAGE_ROOT \
---enable-static \
---enable-shared \
---enable-local-libopts \
---enable-local-libevent \
---enable-accurate-adjtime \
---without-ntpsnmpd \
---without-lineeditlibs \
---disable-linuxcaps \
---with-crypto \
---with-openssl-libdir=$SYSROOT/usr/lib \
---with-openssl-incdir=$SYSROOT/usr/include \
---enable-autokey \
---enable-openssl-random \
---enable-thread-support \
---with-threads \
---with-yielding-select=yes \
---without-rpath \
---disable-silent-rules \
---disable-all-clocks \
---disable-parse-clocks \
---enable-NMEA \
---enable-ATOM \
---enable-LOCAL-CLOCK
-
-$MAKE
-make install
-touch __package_installed
-fi
-
 ############# ###############################################################
 # SETSERIAL # ###############################################################
 ############# ###############################################################
@@ -186,3 +124,84 @@ $MAKE
 make install
 touch __package_installed
 fi
+
+####### #####################################################################
+# NTP # #####################################################################
+####### #####################################################################
+
+DL="ntp-4.2.8p10.tar.gz"
+URL="http://archive.ntp.org/ntp4/ntp-4.2/$DL"
+mkdir -p $SRC/ntp && cd $SRC/ntp
+FOLDER="${DL%.tar.gz*}"
+[ "$REBUILD_ALL" == "1" ] && rm -rf "$FOLDER"
+if [ ! -f "$FOLDER/__package_installed" ]; then
+[ ! -f "$DL" ] && wget $URL
+[ ! -d "$FOLDER" ] && tar xzvf $DL
+cd $FOLDER
+
+# add support for PPS kernel interface (if not already there)
+TIMEPPS_H="${PATH_CMD%/*}/timepps.h"
+PACKAGE_ROOT_TIMEPPS_H="$PACKAGE_ROOT/usr/include/timepps.h"
+if [ ! -f "$PACKAGE_ROOT_TIMEPPS_H" ] && [ -f "$TIMEPPS_H" ]; then
+  PACKAGE_ROOT_INCLUDE="${PACKAGE_ROOT_TIMEPPS_H%/*}"
+  mkdir -p "$PACKAGE_ROOT_INCLUDE"
+  cp -p "$TIMEPPS_H" "$PACKAGE_ROOT_INCLUDE"
+fi
+
+# fix issue with SNTP linker options
+PATCH_NAME="${PATH_CMD%/*}/asuswrt-ntp-harden-linux.patch"
+patch -p1 -i "$PATCH_NAME"
+
+# build NTP (NEMA+PPS)
+PKG_CONFIG_PATH="$PACKAGE_ROOT/lib/pkgconfig" \
+OPTS="-DOPENSSL -ffunction-sections -fdata-sections -O3 -pipe -march=armv7-a -mtune=cortex-a9 -fno-caller-saves -mfloat-abi=soft -Wall -fPIC -std=gnu99 -I$PACKAGE_ROOT/include  -I$PACKAGE_ROOT/usr/include" \
+CFLAGS="$OPTS" CXXFLAGS="$OPTS" CPPFLAGS="$OPTS" \
+LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections  -L$PACKAGE_ROOT/lib" \
+NTP_HARD_LDFLAGS="-Wl,-z,relro -Wl,-z,now" \
+ac_cv_header_md5_h=no ac_cv_lib_rt_sched_setscheduler=no ac_cv_header_dns_sd_h=no hw_cv_func_snprintf_c99=yes hw_cv_func_vsnprintf_c99=yes ac_cv_make_ntptime=yes \
+./configure \
+--host=arm-brcm-linux-uclibcgnueabi \
+'--build=' \
+--prefix=$PACKAGE_ROOT \
+--enable-static \
+--enable-shared \
+--enable-local-libopts \
+--enable-local-libevent \
+--enable-accurate-adjtime \
+--without-ntpsnmpd \
+--without-lineeditlibs \
+--disable-linuxcaps \
+--with-crypto \
+--with-openssl-libdir=$SYSROOT/usr/lib \
+--with-openssl-incdir=$SYSROOT/usr/include \
+--enable-autokey \
+--enable-openssl-random \
+--enable-thread-support \
+--with-threads \
+--with-yielding-select=yes \
+--without-rpath \
+--disable-silent-rules \
+--disable-all-clocks \
+--disable-parse-clocks \
+--enable-NMEA \
+--enable-ATOM \
+--enable-LOCAL-CLOCK
+
+$MAKE
+make install
+touch __package_installed
+fi
+
+########### #################################################################
+# ASUSWRT # #################################################################
+########### #################################################################
+
+# apply Linux kernel patch to enable PPS in USB and fix the FTDI USB-to-Serial driver 
+# to support PPS on the DCD pin
+pushd .
+cd $ASUSWRT_MERLIN
+PATCH_NAME="${PATH_CMD%/*}/asuswrt-arm-pps-enable.patch"
+patch --dry-run --silent -p2 -i "$PATCH_NAME" >/dev/null 2>&1 && \
+  patch -p2 -i "$PATCH_NAME" || \
+  echo "The Linux kernel patch was not applied."
+popd
