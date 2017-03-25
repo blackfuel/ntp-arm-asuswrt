@@ -129,7 +129,8 @@ fi
 # NTP # #####################################################################
 ####### #####################################################################
 
-DL="ntp-4.2.8p10.tar.gz"
+DL="ntp-4.2.8p9-win.tar.gz"
+#DL="ntp-4.2.8p10.tar.gz"
 URL="http://archive.ntp.org/ntp4/ntp-4.2/$DL"
 mkdir -p $SRC/ntp && cd $SRC/ntp
 FOLDER="${DL%.tar.gz*}"
@@ -139,7 +140,7 @@ if [ ! -f "$FOLDER/__package_installed" ]; then
 [ ! -d "$FOLDER" ] && tar xzvf $DL
 cd $FOLDER
 
-# add support for PPS kernel interface (if not already there)
+# add support for PPS API kernel interface (if not already there)
 TIMEPPS_H="${PATH_CMD%/*}/timepps.h"
 PACKAGE_ROOT_TIMEPPS_H="$PACKAGE_ROOT/usr/include/timepps.h"
 if [ ! -f "$PACKAGE_ROOT_TIMEPPS_H" ] && [ -f "$TIMEPPS_H" ]; then
@@ -149,8 +150,8 @@ if [ ! -f "$PACKAGE_ROOT_TIMEPPS_H" ] && [ -f "$TIMEPPS_H" ]; then
 fi
 
 # fix issue with SNTP linker options
-PATCH_NAME="${PATH_CMD%/*}/asuswrt-ntp-harden-linux.patch"
-patch -p1 -i "$PATCH_NAME"
+#PATCH_NAME="${PATH_CMD%/*}/asuswrt-ntp-harden-linux.patch"
+#patch -p1 -i "$PATCH_NAME"
 
 # build NTP (NEMA+PPS)
 PKG_CONFIG_PATH="$PACKAGE_ROOT/lib/pkgconfig" \
