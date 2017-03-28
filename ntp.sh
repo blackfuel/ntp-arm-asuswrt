@@ -129,8 +129,8 @@ fi
 # NTP # #####################################################################
 ####### #####################################################################
 
-DL="ntp-4.2.8p9-win.tar.gz"
-#DL="ntp-4.2.8p10.tar.gz"
+#DL="ntp-4.2.8p9-win.tar.gz"
+DL="ntp-4.2.8p10.tar.gz"
 URL="http://archive.ntp.org/ntp4/ntp-4.2/$DL"
 mkdir -p $SRC/ntp && cd $SRC/ntp
 FOLDER="${DL%.tar.gz*}"
@@ -149,8 +149,13 @@ if [ ! -f "$PACKAGE_ROOT_TIMEPPS_H" ] && [ -f "$TIMEPPS_H" ]; then
   cp -p "$TIMEPPS_H" "$PACKAGE_ROOT_INCLUDE"
 fi
 
-# fix issue with SNTP linker options
-#PATCH_NAME="${PATH_CMD%/*}/asuswrt-ntp-harden-linux.patch"
+# fix issue with SNTP linker options for linux hardening
+PATCH_NAME="${PATH_CMD%/*}/asuswrt-ntp-harden-fix.patch"
+patch -p1 -i "$PATCH_NAME"
+
+## fix issue with 4.2.8p10 NTPD assertion on startup, fail to start
+## (increase stack size to at least 32kB)
+#PATCH_NAME="${PATH_CMD%/*}/NTP_4_2_8P10+1@0x58d8b21e.patch"
 #patch -p1 -i "$PATCH_NAME"
 
 # build NTP (NEMA+PPS)
