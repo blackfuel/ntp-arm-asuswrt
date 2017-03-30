@@ -77,10 +77,22 @@ LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections -L$SYSROOT/usr/li
 ./configure \
 --host=arm-brcm-linux-uclibcgnueabi \
 '--build=' \
---prefix=$PACKAGE_ROOT
+--prefix=$PACKAGE_ROOT \
+--mandir=$PACKAGE_ROOT/share/man
 
 $MAKE
 DESTDIR="$PACKAGE_ROOT" make install
+
+# fix the man page install bug
+pushd .
+cd "$PACKAGE_ROOT"
+if [ -f usr/man/man8 ]; then
+  mkdir -p share/man/man8
+  mv usr/man/man8 share/man/man8/setserial.8
+  rmdir usr/man
+fi
+popd
+
 touch __package_installed
 fi
 
