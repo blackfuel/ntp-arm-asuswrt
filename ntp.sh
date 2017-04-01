@@ -161,20 +161,24 @@ if [ ! -f "$PACKAGE_ROOT_TIMEPPS_H" ] && [ -f "$TIMEPPS_H" ]; then
   cp -p "$TIMEPPS_H" "$PACKAGE_ROOT_INCLUDE"
 fi
 
-# fix issue with SNTP linker options for linux hardening
+# ntpd: fix issue with assertion on startup and failing to start
+# recvbuff.c:317: REQUIRE((((void *)0) == pf->phead && ((void *)0) == pf->pptail) || (((void *)0) != pf->phead && ((void *)0) != pf->pptail)) failed
 PATCH_NAME="${PATH_CMD%/*}/asuswrt-ntp-harden-fix.patch"
-patch -p1 -i "$PATCH_NAME"
+patch --dry-run --silent -p1 -i "$PATCH_NAME" >/dev/null 2>&1 && \
+  patch -p1 -i "$PATCH_NAME" || \
+  echo "The patch was not applied."
 
-## fix issue with 4.2.8p10 NTPD assertion on startup, fail to start
-## (increase stack size to at least 32kB)
-#PATCH_NAME="${PATH_CMD%/*}/NTP_4_2_8P10+1@0x58d8b21e.patch"
-#patch -p1 -i "$PATCH_NAME"
+# ntpd: pthread warmup (increase stack size to at least 32kB)
+PATCH_NAME="${PATH_CMD%/*}/NTP_4_2_8P10+1@0x58d8b21e.patch"
+patch --dry-run --silent -p1 -i "$PATCH_NAME" >/dev/null 2>&1 && \
+  patch -p1 -i "$PATCH_NAME" || \
+  echo "The patch was not applied."
 
-# build NTP (NEMA+PPS)
+# build NTP server with NEMA/GPS+PPS support
 PKG_CONFIG_PATH="$PACKAGE_ROOT/lib/pkgconfig" \
-OPTS="-DOPENSSL -ffunction-sections -fdata-sections -O3 -pipe -march=armv7-a -mtune=cortex-a9 -fno-caller-saves -mfloat-abi=soft -Wall -fPIC -std=gnu99 -I$PACKAGE_ROOT/include  -I$PACKAGE_ROOT/usr/include" \
-CFLAGS="$OPTS" CXXFLAGS="$OPTS" CPPFLAGS="$OPTS" \
-LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections  -L$PACKAGE_ROOT/lib" \
+OPTS="-DOPENSSL -ffunction-sections -fdata-sections -O3 -pipe -march=armv7-a -mtune=cortex-a9 -fno-caller-saves -mfloat-abi=soft -Wall -fPIC -std=gnu99 -I$PACKAGE_ROOT/include -I$PACKAGE_ROOT/usr/include" \
+CFLAGS="$OPTS" CPPFLAGS="$OPTS" \
+LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections -L$PACKAGE_ROOT/lib" \
 ac_cv_header_md5_h=no ac_cv_lib_rt_sched_setscheduler=no ac_cv_header_dns_sd_h=no hw_cv_func_snprintf_c99=yes hw_cv_func_vsnprintf_c99=yes ac_cv_make_ntptime=yes \
 ./configure \
 --host=arm-brcm-linux-uclibcgnueabi \
