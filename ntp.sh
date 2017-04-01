@@ -161,6 +161,7 @@ if [ ! -f "$PACKAGE_ROOT_TIMEPPS_H" ] && [ -f "$TIMEPPS_H" ]; then
   cp -p "$TIMEPPS_H" "$PACKAGE_ROOT_INCLUDE"
 fi
 
+if [ "$DL" == "ntp-4.2.8p10.tar.gz" ]; then
 # ntpd: fix issue with assertion on startup and failing to start
 # recvbuff.c:317: REQUIRE((((void *)0) == pf->phead && ((void *)0) == pf->pptail) || (((void *)0) != pf->phead && ((void *)0) != pf->pptail)) failed
 PATCH_NAME="${PATH_CMD%/*}/asuswrt-ntp-harden-fix.patch"
@@ -173,6 +174,7 @@ PATCH_NAME="${PATH_CMD%/*}/NTP_4_2_8P10+1@0x58d8b21e.patch"
 patch --dry-run --silent -p1 -i "$PATCH_NAME" >/dev/null 2>&1 && \
   patch -p1 -i "$PATCH_NAME" || \
   echo "The patch was not applied."
+fi
 
 # build NTP server with NEMA/GPS+PPS support
 PKG_CONFIG_PATH="$PACKAGE_ROOT/lib/pkgconfig" \
