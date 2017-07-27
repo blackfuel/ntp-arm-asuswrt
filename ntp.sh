@@ -27,7 +27,7 @@ echo $PATH | grep -qF /opt/brcm-arm || export PATH=$PATH:/opt/brcm-arm/bin:/opt/
 [ ! -h /opt/brcm-arm ] && sudo ln -sf $BRCMARM_TOOLCHAIN /opt/brcm-arm
 [ ! -d /projects/hnd/tools/linux ] && sudo mkdir -p /projects/hnd/tools/linux
 [ ! -h /projects/hnd/tools/linux/hndtools-arm-linux-2.6.36-uclibc-4.5.3 ] && sudo ln -sf /opt/brcm-arm /projects/hnd/tools/linux/hndtools-arm-linux-2.6.36-uclibc-4.5.3
-#sudo apt-get install makedepends libltdl-dev automake1.11
+#sudo apt-get install  xutils-dev libltdl-dev automake1.11
 #MAKE="make -j`nproc`"
 MAKE="make -j1"
 
@@ -107,8 +107,10 @@ fi
 # UTIL-LINUX # ##############################################################
 ############## ##############################################################
 
-DL="util-linux-2.29.2.tar.xz"
-URL="https://www.kernel.org/pub/linux/utils/util-linux/v2.29/$DL"
+#DL="util-linux-2.29.2.tar.xz"
+#URL="https://www.kernel.org/pub/linux/utils/util-linux/v2.29/$DL"
+DL="util-linux-2.30.1.tar.xz"
+URL="https://www.kernel.org/pub/linux/utils/util-linux/v2.30/$DL"
 mkdir -p $SRC/util-linux && cd $SRC/util-linux
 FOLDER="${DL%.tar.xz*}"
 [ "$REBUILD_ALL" == "1" ] && rm -rf "$FOLDER"
@@ -122,6 +124,15 @@ cd $TOP/ncurses/lib
 [ ! -f libtinfo.so.6 ] && ln -sf libncursesw.so.6 libtinfo.so.6
 [ ! -f libtinfo.so ] && ln -sf libtinfo.so.6 libtinfo.so
 popd
+
+if [ "$DL" == "util-linux-2.30.tar.xz" ] ||
+   [ "$DL" == "util-linux-2.30.1.tar.xz" ]; then
+# util-linux/sys-utils: posix_fallocate support is not compiled
+PATCH_NAME="${PATH_CMD%/*}/util-linux_sys-utils_no-posix-fallocate.patch"
+patch --dry-run --silent -p1 -i "$PATCH_NAME" >/dev/null 2>&1 && \
+  patch -p1 -i "$PATCH_NAME" || \
+  echo "The patch was not applied."
+fi
 
 PKG_CONFIG_PATH="$PACKAGE_ROOT/lib/pkgconfig" \
 OPTS="-ffunction-sections -fno-data-sections -O3 -pipe -march=armv7-a -mtune=cortex-a9 -fno-caller-saves -mfloat-abi=soft -Wall -fPIC -std=gnu99 -I$TOP/ncurses/include -I$SYSROOT/usr/include -lm" \
@@ -205,7 +216,7 @@ ac_cv_header_md5_h=no ac_cv_lib_rt_sched_setscheduler=no ac_cv_header_dns_sd_h=n
 --enable-accurate-adjtime \
 --without-ntpsnmpd \
 --without-lineeditlibs \
---disable-linuxcaps \
+--enable-linuxcaps \
 --with-crypto \
 --with-openssl-libdir=$SYSROOT/usr/lib \
 --with-openssl-incdir=$SYSROOT/usr/include \
@@ -220,7 +231,8 @@ ac_cv_header_md5_h=no ac_cv_lib_rt_sched_setscheduler=no ac_cv_header_dns_sd_h=n
 --disable-parse-clocks \
 --enable-NMEA \
 --enable-ATOM \
---enable-LOCAL-CLOCK
+--enable-LOCAL-CLOCK \
+--enable-SHM
 
 $MAKE
 make install
