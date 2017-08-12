@@ -232,7 +232,9 @@ ac_cv_header_md5_h=no ac_cv_lib_rt_sched_setscheduler=no ac_cv_header_dns_sd_h=n
 --enable-NMEA \
 --enable-ATOM \
 --enable-LOCAL-CLOCK \
---enable-SHM
+--enable-SHM \
+--enable-WWV \
+--enable-GPSD
 
 $MAKE
 make install
